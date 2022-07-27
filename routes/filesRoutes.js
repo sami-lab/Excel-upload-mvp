@@ -11,9 +11,9 @@ router
   .post(uploadServer.single('file'), filesController.createOne)
   .get(filesController.getFiles);
 
+router.route('/lastWeekRecords').get(filesController.getLastWeekFiles);
+router.route('/getRecordByDate').post(filesController.getFilesByDate);
 router.route('/:id').get(filesController.getFile).delete(filesController.delete);
 
-router.route('/lastWeekRecords').get(filesController.getLastWeekFiles);
-router.route('/getRecordByDate').post(filesController.getLastWeekFiles);
 module.exports = router;
 //This controller is not finished

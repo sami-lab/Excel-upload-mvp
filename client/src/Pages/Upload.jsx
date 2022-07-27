@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { Grid, Typography, Button } from '@material-ui/core';
-
+import { Grid, Typography, Button, CircularProgress } from '@material-ui/core';
+import { useNavigate } from 'react-router-dom';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import axios from '../Helper/axios';
 
@@ -78,12 +78,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Upload() {
+  const navigate = useNavigate();
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
 
   const fileUploadHandler = async (e) => {
-    if (!e.target.files || e.target.files[0]) {
+    if (!e.target.files && !e.target.files[0]) {
       setError('No file Selected');
       return;
     }
@@ -94,6 +95,7 @@ export default function Upload() {
       formData.append('file', e.target.files[0]);
       const response = await axios.post(`/files/`, formData);
       if (response.data.status === 'success') {
+        navigate('/');
       } else {
         setError(response.data.message);
       }
@@ -130,9 +132,23 @@ export default function Upload() {
       />
       <Grid item style={{ marginTop: '1em' }}>
         <label htmlFor="icon-button-file">
-          <Button variant="outlined">Upload</Button>
+          <Button
+            variant="outlined"
+            component="span"
+            style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}
+          >
+            {loading && <CircularProgress size="1.2rem" />}
+            Upload
+          </Button>
         </label>
       </Grid>
+      {error && (
+        <Grid item style={{ marginTop: '1em' }}>
+          <Typography variant="h4" style={{ textAlign: 'center' }} className={classes.titleText}>
+            {error}
+          </Typography>
+        </Grid>
+      )}
     </Grid>
   );
 }
