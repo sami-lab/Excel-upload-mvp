@@ -52,7 +52,7 @@ app.use(compression());
 process.env.NODE_ENV === 'development' ? app.use(morgan('dev')) : null;
 
 //Routes Middleware
-app.use('/api/v1/filesRoutes', filesRoutes);
+app.use('/api/v1/files', filesRoutes);
 app.use(globalError);
 
 app.use(function (request, response, next) {

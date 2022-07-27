@@ -31,7 +31,7 @@ export default function Main() {
       .get(
         'https://google-sheets-ninja-api.herokuapp.com/sheet/1fx8DTeZvBC-f96sSvwLDhsaKqoRNHjCRtsgQaisJegM/CalendarView!A1:C'
       )
-      .then((result) => filterData(result?.data));
+      .then((result) => console.log(result));
   };
 
   useEffect(() => {

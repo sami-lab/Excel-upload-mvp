@@ -15,9 +15,12 @@ exports.delete = catchAsync(async (req, res, next) => {
 });
 
 exports.createOne = catchAsync(async (req, res, next) => {
-  const { name } = req.body;
+  //const { name } = req.body;
+  if (!req.file) {
+    return next(new AppError('Invalid data', 401));
+  }
   const doc = await Files.create({
-    name,
+    file: req.file.filename,
   });
   res.status(201).json({
     status: 'success',
