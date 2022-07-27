@@ -1,26 +1,25 @@
-const express = require("express");
-const morgan = require("morgan");
-const path = require("path");
-const rateLimit = require("express-rate-limit");
-const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize");
-const xss = require("xss-clean");
-const compression = require("compression");
-const cors = require("cors");
-const AppError = require("./utils/appError");
-const globalError = require("./Controllers/errorController");
+const express = require('express');
+const morgan = require('morgan');
+const path = require('path');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const compression = require('compression');
+const cors = require('cors');
+const AppError = require('./utils/appError');
+const globalError = require('./Controllers/errorController');
 
-const users = require("./routes/users");
-const transactions = require("./routes/transactions");
+const filesRoutes = require('./routes/filesRoutes');
 
 const app = express();
-app.enable("trust proxy");
+app.enable('trust proxy');
 //Global Middleware Stack
 
 //implementing CORS
 //Access-control-Allow-Origin(Allowing Everyone to use our API)
 app.use(cors());
-app.options("*", cors());
+app.options('*', cors());
 // app.options('https://expense-tracker-sami.surge.sh',cors())
 //Setting Security Http Headers
 //app.use(helmet());
@@ -28,14 +27,14 @@ app.options("*", cors());
 const limit = rateLimit({
   max: 500,
   windowMs: 60 * 60 * 1000,
-  message: "Too Many Request From this IP.",
+  message: 'Too Many Request From this IP.',
 });
-app.use("/api", limit);
+app.use('/api', limit);
 //body parse middleware
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: '10kb' }));
 //seting View Engine
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "views"));
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 //Data Sanitization against No Sql query injection(Filtering $ etc)
 app.use(mongoSanitize());
 //Data Sanitization against XSS
@@ -50,25 +49,24 @@ app.use(compression());
 //app.use(express.static(`${__dirname}/public`));
 
 //logging
-process.env.NODE_ENV === "development" ? app.use(morgan("dev")) : null;
+process.env.NODE_ENV === 'development' ? app.use(morgan('dev')) : null;
 
 //Routes Middleware
-app.use("/api/v1/users", users);
-app.use("/api/v1/transactions", transactions);
+app.use('/api/v1/filesRoutes', filesRoutes);
 app.use(globalError);
 
 app.use(function (request, response, next) {
-  if (process.env.NODE_ENV != "development" && !request.secure) {
-    return response.redirect("https://" + request.headers.host + request.url);
+  if (process.env.NODE_ENV != 'development' && !request.secure) {
+    return response.redirect('https://' + request.headers.host + request.url);
   }
 
   next();
 });
-if (process.env.NODE_ENV == "production") {
-  app.use(express.static("client/build"));
-  const path = require("path");
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+if (process.env.NODE_ENV == 'production') {
+  app.use(express.static('client/build'));
+  const path = require('path');
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
 // app.all('*', (req, res, next) => {
