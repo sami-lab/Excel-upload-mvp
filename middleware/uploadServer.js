@@ -35,7 +35,7 @@ const multerFilter = (req, file, cb) => {
       allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|pdf|doc|docx)$/;
       break;
     case 'file':
-      allowedType = /\.(xlsx)$/;
+      allowedType = /\.(xlsx|doc|docx)$/;
       break;
     default:
       allowedType = /\.(jpg|JPG|jpeg|JPEG|png|PNG)$/;
@@ -44,7 +44,7 @@ const multerFilter = (req, file, cb) => {
   if (file.originalname.match(allowedType)) {
     cb(null, true);
   } else {
-    cb(new AppError('Invalid Format testing', 400), false);
+    cb(new AppError('Invalid Format', 400), false);
   }
 };
 module.exports = multer({

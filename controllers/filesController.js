@@ -3,6 +3,12 @@ const AppError = require('../utils/appError');
 
 const Files = require('../models/fileModel');
 
+const fs = require('fs').promises;
+const path = require('path');
+
+const libre = require('libreoffice-convert');
+libre.convertAsync = require('util').promisify(libre.convert);
+const uploadGcd = require('../middleware/uploadgcd');
 exports.delete = catchAsync(async (req, res, next) => {
   const doc = await Files.findByIdAndDelete(req.params.id);
   if (!doc) {
@@ -14,11 +20,30 @@ exports.delete = catchAsync(async (req, res, next) => {
   });
 });
 
+async function convert(name) {
+  try {
+    let arr = name.split('.');
+    const enterPath = path.join(__dirname, `../public/files/${name}`);
+    const outputPath = path.join(__dirname, `../public/files/${arr[0]}.pdf`);
+
+    // Read file
+
+    let data = await fs.readFile(enterPath);
+    console.log(enterPath, outputPath, '====================', data);
+    let done = await libre.convertAsync(data, '.pdf', undefined);
+    await fs.writeFile(outputPath, done);
+    return { success: true, fileName: arr[0] };
+  } catch (err) {
+    console.log(err);
+    return { success: false };
+  }
+}
 exports.createOne = catchAsync(async (req, res, next) => {
   //const { name } = req.body;
   if (!req.file) {
     return next(new AppError('Invalid data', 401));
   }
+
   const doc = await Files.create({
     file: req.file.filename,
   });

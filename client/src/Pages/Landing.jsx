@@ -84,12 +84,14 @@ export default function Main() {
     <>
       {files.map((f) => (
         <div key={f.file}>
-          {/* <iframe
+          <iframe
             style={{ width: '98vw', height: '100vw' }}
-            src={process.env.REACT_APP_API_URL + '/files/' + f.file}
+            //src={process.env.REACT_APP_API_URL + '/files/' + f.file}
+            src="https://drive.google.com/file/d/1_SkoGQEkAycjZ3dGz_M7OohDJohzLa0_/view?usp=sharing"
+            //src="https://drive.google.com/file/d/1_SkoGQEkAycjZ3dGz_M7OohDJohzLa0_/view?usp=drivesdk"
             //src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml"
             // src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml?widget=true&amp;headers=false"
-          ></iframe> */}
+          ></iframe>
         </div>
       ))}
     </>
