@@ -40,12 +40,13 @@ async function convert(name) {
 }
 exports.createOne = catchAsync(async (req, res, next) => {
   //const { name } = req.body;
+
   if (!req.file) {
     return next(new AppError('Invalid data', 401));
   }
 
   const doc = await Files.create({
-    file: req.file.filename,
+    ...req.file,
   });
   res.status(201).json({
     status: 'success',

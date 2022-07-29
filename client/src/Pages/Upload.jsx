@@ -99,7 +99,7 @@ export default function Upload() {
       } else {
         setError(response.data.message);
       }
-      setLoading(true);
+      setLoading(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
       setLoading(true);

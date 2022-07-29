@@ -7,7 +7,10 @@ var FileSchema = mongoose.Schema(
       required: [true, 'A File Object must have a name'],
       trim: true,
     },
-
+    fileId: {
+      type: String,
+      trim: true,
+    },
     date: {
       type: Date,
       default: Date.now(),

@@ -5,19 +5,24 @@ const { google } = require('googleapis');
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
 
-function authorize(credentials, callback) {
-  const { client_secret, client_id, redirect_uris } = credentials;
+const renameImage = (file) => `${Date.now()}-${file.name}`;
+
+async function authorize(callback, file, path) {
+  const client_secret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+  const client_id = process.env.GOOGLE_DRIVE_CLIENT_ID;
+  const redirect_uris = process.env.GOOGLE_DRIVE_REDIRECT_URI;
+
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris);
 
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, (err, token) => {
-    if (err) return getAccessToken(oAuth2Client, callback);
+    if (err) return getAccessToken(oAuth2Client, callback, file, path);
     oAuth2Client.setCredentials(JSON.parse(token));
-    callback(oAuth2Client);
+    return callback(oAuth2Client, file, path);
   });
 }
 
-function getAccessToken(oAuth2Client, callback) {
+function getAccessToken(oAuth2Client, callback, file, path) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
@@ -27,35 +32,47 @@ function getAccessToken(oAuth2Client, callback) {
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question(
-    '4/0AdQt8qjqc5cDOqZ3K19P-NITbYkJdbf23HJK8100Plqp-rIqV1S3rNAk2K5JyxOkFvMlhQ',
-    (code) => {
-      rl.close();
-      oAuth2Client.getToken(code, (err, token) => {
-        if (err) return console.error('Error retrieving access token', err);
-        oAuth2Client.setCredentials(token);
-        // Store the token to disk for later program executions
-        fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-          if (err) return console.error(err);
-          console.log('Token stored to', TOKEN_PATH);
-        });
-        callback(oAuth2Client);
+  rl.question('Authorize this app by visiting this url:', (code) => {
+    rl.close();
+    oAuth2Client.getToken(code, (err, token) => {
+      if (err) {
+        console.error('Error retrieving access token', err);
+        return {
+          success: false,
+          message: 'Error retrieving access token',
+        };
+      }
+      oAuth2Client.setCredentials(token);
+      // Store the token to disk for later program executions
+      fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        if (err) {
+          console.error(err);
+          return {
+            success: false,
+            message: 'Error saving access token',
+          };
+        }
+        console.log('Token stored to', TOKEN_PATH);
+        return callback(oAuth2Client, file, path);
       });
-    }
-  );
+    });
+  });
 }
 
-function uploadFile(auth) {
+function uploadFile(auth, file, path) {
   const drive = google.drive({ version: 'v3', auth });
+  let fileName = renameImage(file);
+
   const fileMetadata = {
-    name: 'test.xlsx',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.shee',
+    name: fileName,
+    mimeType: file.type,
   };
   const media = {
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.shee',
-    body: fs.createReadStream(
-      'public/files/1659027890312-1658958233505-16th July HeatMap (1) (1).xlsx'
-    ),
+    mimeType: file.type,
+    // body: fs.createReadStream(
+    //   'public/files/1659027890312-1658958233505-16th July HeatMap (1) (1).xlsx'
+    // ),
+    body: file.data,
   };
   drive.files.create(
     {
@@ -67,9 +84,13 @@ function uploadFile(auth) {
       if (err) {
         // Handle error
         console.error(err);
+        return {
+          success: false,
+          message: 'Fail to Save file',
+        };
       } else {
         console.log('File Id: ', file.data);
-        generatePublicURL(auth, file.data.id);
+        return generatePublicURL(auth, file.data.id);
       }
     }
   );
@@ -98,6 +119,34 @@ async function generatePublicURL(auth, fileId) {
       fileId: fileId,
       fields: 'webViewLink, webContentLink',
     });
-    console.log(result.data);
-  } catch (err) {}
+    return {
+      success: true,
+      data: {
+        fileId: fileId,
+        file: result.data.webViewLink,
+        //webContentLink: result.data.webContentLink,
+      },
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      success: false,
+      message: 'Error making file public',
+    };
+  }
 }
+
+module.exports = (key, path) => {
+  return async (req, res, next) => {
+    if (!req.files || !req.files[key]) {
+      return next();
+    }
+    let response = await authorize(uploadFile, req.files[key], path);
+    console.log(response);
+    if (response.status) {
+      req[key] = response.data;
+      return next();
+    }
+    next(new AppError('Error in Updloading Image.', 500));
+  };
+};

@@ -9,6 +9,7 @@ const compression = require('compression');
 const cors = require('cors');
 const AppError = require('./utils/appError');
 const globalError = require('./Controllers/errorController');
+var fileupload = require('express-fileupload');
 
 const filesRoutes = require('./routes/filesRoutes');
 
@@ -20,6 +21,7 @@ app.enable('trust proxy');
 //Access-control-Allow-Origin(Allowing Everyone to use our API)
 app.use(cors());
 app.options('*', cors());
+app.use(fileupload());
 // app.options('https://expense-tracker-sami.surge.sh',cors())
 //Setting Security Http Headers
 //app.use(helmet());
