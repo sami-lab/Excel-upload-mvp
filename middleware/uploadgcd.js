@@ -1,10 +1,11 @@
-const fs = require('fs');
+const fs = require('fs').promises;
+const { Readable } = require('stream');
 const readline = require('readline');
 const { google } = require('googleapis');
-
+const AppError = require('../utils/appError');
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_PATH = 'token.json';
-
+const f = require('fs');
 const renameImage = (file) => `${Date.now()}-${file.name}`;
 
 async function authorize(callback, file, path) {
@@ -14,15 +15,19 @@ async function authorize(callback, file, path) {
 
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris);
 
-  // Check if we have previously stored a token.
-  fs.readFile(TOKEN_PATH, (err, token) => {
-    if (err) return getAccessToken(oAuth2Client, callback, file, path);
+  try {
+    // Check if we have previously stored a token.
+    let token = await fs.readFile(TOKEN_PATH);
+
     oAuth2Client.setCredentials(JSON.parse(token));
-    return callback(oAuth2Client, file, path);
-  });
+    return await callback(oAuth2Client, file, path);
+  } catch (err) {
+    console.log('token file not exist', err);
+    return await getAccessToken(oAuth2Client, callback, file, path);
+  }
 }
 
-function getAccessToken(oAuth2Client, callback, file, path) {
+async function getAccessToken(oAuth2Client, callback, file, path) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
@@ -32,68 +37,62 @@ function getAccessToken(oAuth2Client, callback, file, path) {
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question('Authorize this app by visiting this url:', (code) => {
+  await rl.question('Authorize this app by visiting this url:', async (code) => {
     rl.close();
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) {
-        console.error('Error retrieving access token', err);
-        return {
-          success: false,
-          message: 'Error retrieving access token',
-        };
-      }
+    try {
+      let token = await oAuth2Client.getToken(code);
       oAuth2Client.setCredentials(token);
       // Store the token to disk for later program executions
       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
         if (err) {
           console.error(err);
-          return {
-            success: false,
-            message: 'Error saving access token',
-          };
         }
         console.log('Token stored to', TOKEN_PATH);
-        return callback(oAuth2Client, file, path);
       });
-    });
+      return await callback(oAuth2Client, file, path);
+    } catch (err) {
+      console.error('Error from getAccessToken', err);
+      return {
+        success: false,
+        message: 'Error! ' + err.message,
+      };
+    }
   });
 }
 
-function uploadFile(auth, file, path) {
+async function uploadFile(auth, fileObj, path) {
   const drive = google.drive({ version: 'v3', auth });
-  let fileName = renameImage(file);
+  let fileName = renameImage(fileObj);
 
+  //console.log(fileObj);
   const fileMetadata = {
     name: fileName,
-    mimeType: file.type,
+    mimeType: fileObj.mimetype,
+    parents: ['1ORBZarLuzkV_hpYfGhUtXXl5zkBgrm4q'],
   };
   const media = {
-    mimeType: file.type,
+    mimeType: fileObj.mimetype,
     // body: fs.createReadStream(
     //   'public/files/1659027890312-1658958233505-16th July HeatMap (1) (1).xlsx'
     // ),
-    body: file.data,
+    //body:  fs.createReadStream(fileObj),
+    body: Readable.from(fileObj.data),
   };
-  drive.files.create(
-    {
+  try {
+    let file = await drive.files.create({
       requestBody: fileMetadata,
       media: media,
       //fields: 'id',
-    },
-    (err, file) => {
-      if (err) {
-        // Handle error
-        console.error(err);
-        return {
-          success: false,
-          message: 'Fail to Save file',
-        };
-      } else {
-        console.log('File Id: ', file.data);
-        return generatePublicURL(auth, file.data.id);
-      }
-    }
-  );
+    });
+    console.log('File Id: ', file.data);
+    return await generatePublicURL(auth, file.data.id);
+  } catch (err) {
+    console.error(err, 'Error in Saving file');
+    return {
+      success: false,
+      message: 'Fail to Save file',
+    };
+  }
 }
 
 // authorize(
@@ -142,11 +141,11 @@ module.exports = (key, path) => {
       return next();
     }
     let response = await authorize(uploadFile, req.files[key], path);
-    console.log(response);
-    if (response.status) {
+    console.log('response', response);
+    if (response && response.success) {
       req[key] = response.data;
       return next();
     }
-    next(new AppError('Error in Updloading Image.', 500));
+    next(new AppError('Error in Uploading Image.', 500));
   };
 };

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(uploadgcd('file', 'excelmvp'), filesController.createOne)
+  .post(uploadgcd('file', 'excelmvp/'), filesController.createOne)
   .get(filesController.getFiles);
 
 router.route('/lastWeekRecords').get(filesController.getLastWeekFiles);

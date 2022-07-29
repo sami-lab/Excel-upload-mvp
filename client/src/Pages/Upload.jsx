@@ -102,7 +102,7 @@ export default function Upload() {
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
-      setLoading(true);
+      setLoading(false);
     }
   };
   return (
@@ -135,7 +135,7 @@ export default function Upload() {
           <Button
             variant="outlined"
             component="span"
-            style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}
+            style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}
           >
             {loading && <CircularProgress size="1.2rem" />}
             Upload
