@@ -11,6 +11,8 @@ router
   .post(uploadgcd('file', 'excelmvp/'), filesController.createOne)
   .get(filesController.getFiles);
 
+router.route('/test').get(filesController.test);
+
 router.route('/lastWeekRecords').get(filesController.getLastWeekFiles);
 router.route('/getRecordByDate').post(filesController.getFilesByDate);
 router.route('/:id').get(filesController.getFile).delete(filesController.delete);

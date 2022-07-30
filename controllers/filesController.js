@@ -9,6 +9,12 @@ const path = require('path');
 const libre = require('libreoffice-convert');
 libre.convertAsync = require('util').promisify(libre.convert);
 const uploadGcd = require('../middleware/uploadgcd');
+
+exports.test = catchAsync(async (req, res, next) => {
+  res.status(200).json({
+    status: 'success',
+  });
+});
 exports.delete = catchAsync(async (req, res, next) => {
   const doc = await Files.findByIdAndDelete(req.params.id);
   if (!doc) {
