@@ -8,7 +8,7 @@ const xss = require('xss-clean');
 const compression = require('compression');
 const cors = require('cors');
 const AppError = require('./utils/appError');
-const globalError = require('./Controllers/errorController');
+const globalError = require('./controllers/errorController');
 var fileupload = require('express-fileupload');
 
 const filesRoutes = require('./routes/filesRoutes');
