@@ -82,24 +82,38 @@ export default function Main() {
   }
   return (
     <>
-      {files.map((f) => (
-        <div key={f.id}>
-          <div style={{ margin: '1em 0', display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h4">Excel Preview</Typography>
-            <Typography variant="h4">{new Date(f.date).toDateString()}</Typography>
-          </div>
-
-          <iframe
-            style={{ width: '98vw', height: '100vw' }}
-            src={f.file}
-            //src={process.env.REACT_APP_API_URL + '/files/' + f.file}
-
-            //src="https://drive.google.com/file/d/1_SkoGQEkAycjZ3dGz_M7OohDJohzLa0_/view?usp=drivesdk"
-            //src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml"
-            // src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml?widget=true&amp;headers=false"
-          ></iframe>
+      {files.length === 0 ? (
+        <div
+          style={{
+            width: '100%',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant="h4">No File created yet</Typography>
         </div>
-      ))}
+      ) : (
+        files.map((f) => (
+          <div key={f.id}>
+            <div style={{ margin: '1em 0', display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="h4">Excel Preview</Typography>
+              <Typography variant="h4">{new Date(f.date).toDateString()}</Typography>
+            </div>
+
+            <iframe
+              style={{ width: '98vw', height: '100vw' }}
+              src={f.file}
+              //src={process.env.REACT_APP_API_URL + '/files/' + f.file}
+
+              //src="https://drive.google.com/file/d/1_SkoGQEkAycjZ3dGz_M7OohDJohzLa0_/view?usp=drivesdk"
+              //src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml"
+              // src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRYLvmgQNaKbs35iOjZFBHK4LjDxgH3h87BbTkJoXh-VGy7aR7rE8MG6gfZBJlgpQ/pubhtml?widget=true&amp;headers=false"
+            ></iframe>
+          </div>
+        ))
+      )}
     </>
   );
 }
