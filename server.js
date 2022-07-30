@@ -10,7 +10,6 @@ process.on('uncaughtException', (err) => {
   process.exit(1); //1 MEANS REJECTION
 });
 //app.use(bodyParser.urlencoded({ extended: false }))
-console.log(process.env);
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 //mongoose.connect(process.env.LOCAL_DB,...)
