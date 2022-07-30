@@ -68,7 +68,7 @@ async function uploadFile(auth, fileObj, path) {
   const fileMetadata = {
     name: fileName,
     mimeType: fileObj.mimetype,
-    parents: ['1ORBZarLuzkV_hpYfGhUtXXl5zkBgrm4q'],
+    parents: [process.env.GOOGLE_DRIVE_FolderID],
   };
   const media = {
     mimeType: fileObj.mimetype,
