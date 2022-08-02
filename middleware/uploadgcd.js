@@ -85,7 +85,7 @@ async function uploadFile(auth, fileObj, path) {
       //fields: 'id',
     });
     console.log('File Id: ', file.data);
-    return await generatePublicURL(auth, file.data.id);
+    return await generatePublicURL(auth, file.data.id, fileName);
   } catch (err) {
     console.error(err, 'Error in Saving file');
     return {
@@ -103,7 +103,7 @@ async function uploadFile(auth, fileObj, path) {
 //   },
 //   uploadFile
 // );
-async function generatePublicURL(auth, fileId) {
+async function generatePublicURL(auth, fileId, fileName) {
   try {
     const drive = google.drive({ version: 'v3', auth });
     let res = await drive.permissions.create({
@@ -123,7 +123,8 @@ async function generatePublicURL(auth, fileId) {
       data: {
         fileId: fileId,
         file: result.data.webViewLink,
-        //webContentLink: result.data.webContentLink,
+        webContentLink: result.data.webContentLink,
+        fileName,
       },
     };
   } catch (err) {

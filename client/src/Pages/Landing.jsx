@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import axios from '../Helper/axios';
@@ -98,7 +98,25 @@ export default function Main() {
         files.map((f) => (
           <div key={f.id}>
             <div style={{ margin: '1em 0', display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="h4">Excel Preview</Typography>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <Typography variant="h4"> Preview</Typography>
+                <Button
+                  variant="contained"
+                  style={{
+                    padding: '10px 30px',
+                    background: '#000',
+                    color: '#fff',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    fontSize: '16px',
+                  }}
+                  component={'a'}
+                  href={f.webContentLink}
+                  download={f.filename}
+                >
+                  Download
+                </Button>
+              </div>
               <Typography variant="h4">{new Date(f.date).toDateString()}</Typography>
             </div>
 

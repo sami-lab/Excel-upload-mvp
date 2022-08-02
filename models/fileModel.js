@@ -2,7 +2,17 @@ const mongoose = require('mongoose');
 
 var FileSchema = mongoose.Schema(
   {
+    filename: {
+      type: String,
+      required: [true, 'A File Object must have a name'],
+      trim: true,
+    },
     file: {
+      type: String,
+      required: [true, 'A File Object must have a name'],
+      trim: true,
+    },
+    webContentLink: {
       type: String,
       required: [true, 'A File Object must have a name'],
       trim: true,
