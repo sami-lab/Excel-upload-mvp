@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 var FileSchema = mongoose.Schema(
   {
-    filename: {
+    fileName: {
       type: String,
       required: [true, 'A File Object must have a name'],
       trim: true,

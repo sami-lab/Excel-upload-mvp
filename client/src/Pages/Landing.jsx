@@ -112,7 +112,7 @@ export default function Main() {
                   }}
                   component={'a'}
                   href={f.webContentLink}
-                  download={f.filename}
+                  download={f.fileName}
                 >
                   Download
                 </Button>

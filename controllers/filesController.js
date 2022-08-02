@@ -50,7 +50,7 @@ exports.createOne = catchAsync(async (req, res, next) => {
   if (!req.file) {
     return next(new AppError('Invalid data', 401));
   }
-
+  console.log(req.file);
   const doc = await Files.create({
     ...req.file,
   });
